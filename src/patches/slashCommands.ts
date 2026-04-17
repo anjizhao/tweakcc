@@ -8,8 +8,11 @@ import { showDiff } from './index';
 export const findSlashCommandListEndPosition = (
   fileContents: string
 ): number | null => {
-  // Find the array with 30+ elements (slash commands list)
-  const arrayStartPattern = /=>\[([$a-zA-Z_][$\w]{1,2},){30}/;
+  // Find the slash commands array. Previously required 30 consecutive
+  // identifiers, but CC 2.1.112 interleaves `...X?[X]:[]` spread expressions
+  // after ~16 identifiers, breaking a strict {30} repetition. 10 is still
+  // specific enough to disambiguate from other arrays.
+  const arrayStartPattern = /=>\[([$a-zA-Z_][$\w]{1,5},){10}/;
   const match = fileContents.match(arrayStartPattern);
 
   if (!match || match.index === undefined) {
