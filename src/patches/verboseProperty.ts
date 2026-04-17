@@ -3,13 +3,23 @@
 import { LocationResult, showDiff } from './index';
 
 const getVerbosePropertyLocation = (oldFile: string): LocationResult | null => {
-  const createElementPattern =
-    /createElement\([$\w]+,\{[^}]+spinnerTip[^}]+overrideMessage[^}]+\}/;
-  const createElementMatch = oldFile.match(createElementPattern);
+  const patterns = [
+    /createElement\([$\w]+,\{[^}]+spinnerTip[^}]+overrideMessage[^}]+\}/,
+    /createElement\([$\w]+,\{[^}]*spinnerSuffix:[$\w]+,verbose:[$\w]+,columns:[$\w]+[^}]*\}/,
+  ];
+
+  let createElementMatch: RegExpMatchArray | null = null;
+  for (const p of patterns) {
+    const m = oldFile.match(p);
+    if (m && m.index !== undefined) {
+      createElementMatch = m;
+      break;
+    }
+  }
 
   if (!createElementMatch || createElementMatch.index === undefined) {
     console.error(
-      'patch: verbose: failed to find createElement with spinnerTip and overrideMessage'
+      'patch: verbose: failed to find createElement with verbose prop'
     );
     return null;
   }
