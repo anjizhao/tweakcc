@@ -30,7 +30,213 @@ You can also create custom patches using tweakcc without having to fork it or op
 
 ## `config.json` reference
 
-_TODO: document each field in `~/.tweakcc/config.json`._
+tweakcc reads `~/.tweakcc/config.json` on each run. The shape is defined by [`TweakccConfig`](src/types.ts) in `src/types.ts`; defaults come from [`DEFAULT_SETTINGS`](src/defaultSettings.ts) in `src/defaultSettings.ts`. Sections below cover every field.
+
+### Top-level (`TweakccConfig`)
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `ccVersion` | `string` | Claude Code version tweakcc last saw. Used to decide when to re-fetch system prompts and when to warn about prompt conflicts. |
+| `ccInstallationPath` | `string \| null` | Absolute path to the CC installation (`cli.js` for npm, the binary for native). Set on first detection; overridable via `TWEAKCC_CC_INSTALLATION_PATH`. |
+| `ccInstallationDir` | `string \| null` | **Deprecated.** Only read for migrating old configs to `ccInstallationPath`. |
+| `lastModified` | `string` (ISO) | Timestamp tweakcc stamps when it writes the config. |
+| `changesApplied` | `boolean` | Whether the last `--apply` succeeded. Drives the "patches applied" indicator at startup. |
+| `settings` | `Settings` | All user-facing customizations. See sections below. |
+| `hidePiebaldAnnouncement` | `boolean?` | Hides the upstream Piebald promo block in the TUI. |
+| `remoteConfig` | `RemoteConfig?` | Cached copy of the last `--config-url` fetch. Contains `sourceUrl`, `dateFetched`, and a `Partial<Settings>` under `settings` that's merged on top of your local settings when applying. |
+
+### `settings.themes`
+
+An array of [`Theme`](src/types.ts) objects. Each theme has `name`, `id`, and a flat `colors` object. Color values accept either `rgb(r,g,b)` strings or `ansi:<name>` (where `<name>` is any [chalk color](https://github.com/chalk/chalk#colors), e.g. `ansi:redBright`).
+
+tweakcc ships 7 default themes in `DEFAULT_SETTINGS.themes`: `dark`, `light`, `light-ansi`, `dark-ansi`, `light-daltonized`, `dark-daltonized`, `monochrome`.
+
+<details>
+<summary>Full list of color keys (60 total)</summary>
+
+General UI: `text`, `inverseText`, `inactive`, `subtle`, `suggestion`, `remember`, `background`, `success`, `error`, `warning`, `warningShimmer`.
+
+Claude brand / spinner: `claude`, `claudeShimmer`, `claudeBlue_FOR_SYSTEM_SPINNER`, `claudeBlueShimmer_FOR_SYSTEM_SPINNER`.
+
+Modes & borders: `autoAccept`, `planMode`, `ide`, `permission`, `permissionShimmer`, `bashBorder`, `promptBorder`, `promptBorderShimmer`.
+
+Diff rendering: `diffAdded`, `diffRemoved`, `diffAddedDimmed`, `diffRemovedDimmed`, `diffAddedWord`, `diffRemovedWord`, `diffAddedWordDimmed`, `diffRemovedWordDimmed`.
+
+Subagent accents (`_FOR_SUBAGENTS_ONLY` suffix): `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`. Plus `professionalBlue`.
+
+Rainbow (highlighter accents): `rainbow_red`, `rainbow_orange`, `rainbow_yellow`, `rainbow_green`, `rainbow_blue`, `rainbow_indigo`, `rainbow_violet`, plus `_shimmer` variants of each.
+
+Clawd ASCII art: `clawd_body`, `clawd_background`.
+
+Message backgrounds: `userMessageBackground`, `bashMessageBackgroundColor`, `memoryBackgroundColor`.
+
+Rate-limit bar: `rate_limit_fill`, `rate_limit_empty`.
+
+</details>
+
+### `settings.thinkingVerbs`
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `format` | `string` | `"{}… "` | Format string; `{}` is replaced with a randomly selected verb. |
+| `verbs` | `string[]` | 177 verbs | Pool of verbs. One is picked at random per response. |
+
+### `settings.thinkingStyle`
+
+Spinner animation next to the thinking verb.
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `updateInterval` | `number` (ms) | `120` | Delay between frames. Lower = faster. |
+| `phases` | `string[]` | `['·','✢','✳','✶','✻','✽']` (platform-dependent) | Characters to cycle through. |
+| `reverseMirror` | `boolean` | `true` | If `true`, the animation plays forwards then backwards (so it ping-pongs). |
+
+### `settings.userMessageDisplay`
+
+Styling for user messages in the chat transcript.
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `format` | `string` | `" > {} "` | Format string; `{}` is replaced with the message text. |
+| `styling` | `string[]` | `[]` | Any of `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'inverse'`. |
+| `foregroundColor` | `string \| 'default'` | `'default'` | `'default'` to leave uncolored, otherwise `rgb(r,g,b)` or `ansi:<name>`. |
+| `backgroundColor` | `string \| 'default' \| null` | `null` | `null`/`'default'` for no background, otherwise a color. |
+| `borderStyle` | `enum` | `'none'` | One of `'none'`, `'single'`, `'double'`, `'round'`, `'bold'`, `'singleDouble'`, `'doubleSingle'`, `'classic'`, `'topBottomSingle'`, `'topBottomDouble'`, `'topBottomBold'`. |
+| `borderColor` | `string` | `'rgb(255,255,255)'` | Color for the border when `borderStyle` isn't `'none'`. |
+| `paddingX` | `number` | `0` | Horizontal padding inside the box. |
+| `paddingY` | `number` | `0` | Vertical padding inside the box. |
+| `fitBoxToContent` | `boolean` | `false` | If `true`, the box shrinks to fit the message instead of filling width. |
+
+### `settings.inputBox`
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `removeBorder` | `boolean` | `false` | Removes the rounded border around the input box for a cleaner look. |
+
+### `settings.misc`
+
+All grab-bag toggles. Descriptions are lifted from the tweakcc Misc view ([`MiscView.tsx`](src/ui/components/MiscView.tsx)).
+
+**Startup / UI**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `showTweakccVersion` | `boolean` | `true` | Shows the blue `+ tweakcc v<VERSION>` message at startup. |
+| `showPatchesApplied` | `boolean` | `true` | Shows the green "tweakcc patches are applied" indicator at startup. |
+| `hideStartupBanner` | `boolean` | `false` | Hides CC's startup banner shown before the first prompt. |
+| `hideStartupClawd` | `boolean` | `false` | Hides the Clawd ASCII art at startup. |
+| `hideCtrlGToEdit` | `boolean` | `false` | Hides the "ctrl-g to edit prompt" hint shown during streaming. |
+| `expandThinkingBlocks` | `boolean` | `true` | Thinking blocks always expanded instead of collapsed. |
+| `enableVerboseProperty` | `boolean` | `true` | Token counter shows detailed info like `(2s · ↓ 169 tokens · thinking)`. |
+| `suppressNativeInstallerWarning` | `boolean` | `false` | Suppress the "use the native installer" warning at startup. |
+| `filterScrollEscapeSequences` | `boolean` | `false` | Filters out terminal escape sequences that cause unwanted scrolling. |
+
+**Model / agent**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enableModelCustomizations` | `boolean` | `true` | `/model` lists all Claude models instead of just the latest 3. |
+| `enableOpusplan1m` | `boolean` | `true` | Adds the `opusplan[1m]` alias (Opus for planning, Sonnet 1M for building). |
+| `enableContextLimitOverride` | `boolean` | `false` | Replaces default context limit with `CLAUDE_CODE_CONTEXT_LIMIT` env var (falls back to 200K). |
+| `allowCustomAgentModels` | `boolean` | `false` | Allow arbitrary model names in custom-agent frontmatter (e.g. `gemini-2.5-flash`). |
+
+**MCP**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `mcpConnectionNonBlocking` | `boolean` | `true` | Start CC immediately while MCPs connect in background. |
+| `mcpServerBatchSize` | `number \| null` | `null` | Number of parallel MCP connections (1–20). `null` = CC default (3). |
+| `enableChannelsMode` | `boolean` | `false` | Force-enable MCP channel notifications (bypasses `tengu_harbor` flag + allowlist). |
+
+**Statusline**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `statuslineThrottleMs` | `number \| null` | `null` | Throttle statusline updates to this interval. `null` = CC default behavior. `0` = instant. |
+| `statuslineUseFixedInterval` | `boolean` | `false` | If `true`, uses `setInterval` instead of throttle (fixed schedule, not on-demand). |
+
+**Session memory**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enableSessionMemory` | `boolean` | `true` | Force-enable session memory (bypasses `tengu_session_memory` and `tengu_coral_fern` Statsig flags). |
+| `enableRememberSkill` | `boolean` | `false` | Register a `remember` skill that reviews session memories into `CLAUDE.local.md`. |
+| `enableConversationTitle` | `boolean` | `true` | Enables `/title` and `/rename` for manually naming conversations. |
+| `enableTitleVisibilityToggle` | `boolean` | `false` | Adds `/session-title` to toggle session title visibility in the prompt bar. |
+
+**File reads / output**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `increaseFileReadLimit` | `boolean` | `false` | Raises the Read file token limit from 25,000 to 1,000,000. |
+| `suppressLineNumbers` | `boolean` | `false` | Removes `1→` line-number prefixes from Read output (saves tokens). |
+| `suppressRateLimitOptions` | `boolean` | `false` | Prevents CC from auto-triggering `/rate-limit-options` on rate limits. |
+| `tableFormat` | `'default' \| 'ascii' \| 'clean' \| 'clean-top-bottom'` | `'default'` | How Claude formats tables. See upstream README for examples. |
+| `tokenCountRounding` | `number \| null` | `null` | Round displayed token counts to nearest multiple (any integer; UI cycles common values). `null` = no rounding. |
+
+**Plan mode / permissions**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `autoAcceptPlanMode` | `boolean` | `false` | Auto-accept plans instead of showing the "Ready to code?" prompt. |
+| `allowBypassPermissionsInSudo` | `boolean \| null` | `false` | ⚠️ Allows `--dangerously-skip-permissions` under `sudo`. Disables a security check. |
+
+**Experimental / feature-flag toggles**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enableSwarmMode` | `boolean` | `true` | Force-enable swarm mode. |
+| `enableWorktreeMode` | `boolean` | `true` | Force-enable the `EnterWorktree` tool (bypasses `tengu_worktree_mode` flag). |
+| `enableVoiceMode` | `boolean` | `false` | Force-enable `/voice` (bypasses `tengu_amber_quartz` gate). |
+| `enableVoiceConciseOutput` | `boolean` | `true` | Enable concise-output prompt for voice. Only applies when `enableVoiceMode` is on. |
+| `enableFixLspSupport` | `boolean` | `true` | Removes unimplemented-field validation errors; adds `textDocument/didOpen` notifications. |
+| `enableCustomSessionColors` | `boolean` | `false` | Accept hex/rgb values in `/color` and named colors from `customColorMap`. |
+| `customColorMap` | `Record<string,string> \| null` | `null` | Map of custom named colors (e.g. `{ "mycolor": "rgb(1,2,3)" }`). Active when `enableCustomSessionColors` is on. |
+
+### `settings.toolsets`, `defaultToolset`, `planModeToolset`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `toolsets` | `Toolset[]` | Array of `{ name: string; allowedTools: string[] \| '*' }`. `'*'` means all tools. |
+| `defaultToolset` | `string \| null` | Name of the toolset auto-selected on CC start. |
+| `planModeToolset` | `string \| null` | Name of the toolset used when in plan mode. |
+
+### `settings.subagentModels`
+
+Per-subagent model overrides. Each accepts any model ID CC knows about, or `null` to use the default.
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `plan` | `string \| null` | `null` | Model for the Plan subagent. |
+| `explore` | `string \| null` | `null` | Model for the Explore subagent. |
+| `generalPurpose` | `string \| null` | `null` | Model for the general-purpose subagent. |
+
+### `settings.inputPatternHighlighters`
+
+Array of highlighter objects. Each has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | User-friendly label shown in the TUI. |
+| `regex` | `string` | Regex pattern (as a string, not a literal). |
+| `regexFlags` | `string` | Flag chars from `g`, `i`, `m`, `s`, `u`, `y`. Must include `g`. |
+| `format` | `string` | Render template; use `{MATCH}` as placeholder. Can add characters around the match. |
+| `styling` | `string[]` | Any of `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'inverse'`. |
+| `foregroundColor` | `string \| null` | `null` to leave uncolored, otherwise `rgb(r,g,b)` or `ansi:<name>`. |
+| `backgroundColor` | `string \| null` | Same rules as `foregroundColor`. |
+| `enabled` | `boolean` | Temporarily disable without deleting. |
+
+### `settings.inputPatternHighlightersTestText`
+
+`string`. Scratch text used in the highlighter editor for live preview. Not applied to CC. Default: `"Type test text here to see highlighting"`.
+
+### `settings.claudeMdAltNames`
+
+`string[] | null`. Fallback filenames CC checks when `CLAUDE.md` doesn't exist, in priority order. `CLAUDE.md` is always tried first regardless. Default:
+
+```json
+["AGENTS.md", "GEMINI.md", "CRUSH.md", "QWEN.md", "IFLOW.md", "WARP.md", "copilot-instructions.md"]
+```
 
 ## Configuration directory
 
