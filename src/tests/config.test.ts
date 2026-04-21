@@ -166,7 +166,7 @@ describe('config.ts', () => {
       expect(result).toEqual(expect.objectContaining(mockConfig));
     });
 
-    it('should backfill enableModelCustomizations when missing in misc', async () => {
+    it('should leave missing misc fields undefined (no backfill from defaults)', async () => {
       const misc = { ...DEFAULT_SETTINGS.misc } as Record<string, unknown>;
       delete misc.enableModelCustomizations;
 
@@ -184,7 +184,42 @@ describe('config.ts', () => {
       vi.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(mockConfig));
       const result = await readConfigFile();
 
-      expect(result.settings.misc.enableModelCustomizations).toBe(true);
+      // Absent user-config fields stay absent so Claude Code's own default
+      // behavior is preserved rather than tweakcc's default being applied.
+      expect(result.settings.misc!.enableModelCustomizations).toBeUndefined();
+    });
+
+    it('should not fill in top-level settings defaults for sparse configs', async () => {
+      const sparse = {
+        ccVersion: '1.0.0',
+        ccInstallationPath: null,
+        lastModified: '2024-01-01',
+        changesApplied: true,
+        settings: {
+          misc: { enableVerboseProperty: false },
+        },
+      };
+
+      const writeFileSpy = vi
+        .spyOn(fs, 'writeFile')
+        .mockResolvedValue(undefined);
+      vi.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(sparse));
+
+      const result = await readConfigFile();
+
+      // Only fields the user wrote should be present.
+      expect(result.settings.thinkingVerbs).toBeUndefined();
+      expect(result.settings.thinkingStyle).toBeUndefined();
+      expect(result.settings.userMessageDisplay).toBeUndefined();
+      expect(result.settings.themes).toBeUndefined();
+      expect(result.settings.inputBox).toBeUndefined();
+      expect(result.settings.subagentModels).toBeUndefined();
+      expect(result.settings.misc!.enableVerboseProperty).toBe(false);
+      // Not set in user config, should stay undefined (CC default preserved).
+      expect(result.settings.misc!.enableOpusplan1m).toBeUndefined();
+
+      // The loaded config must not be written back with filled-in defaults.
+      expect(writeFileSpy).not.toHaveBeenCalled();
     });
 
     it('should preserve explicit false for enableModelCustomizations', async () => {
