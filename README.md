@@ -26,27 +26,49 @@ You can also create custom patches using tweakcc without having to fork it or op
 
 tweakcc reads `~/.tweakcc/config.json` on each run. The shape is defined by [`TweakccConfig`](src/types.ts) in `src/types.ts`; defaults come from [`DEFAULT_SETTINGS`](src/defaultSettings.ts) in `src/defaultSettings.ts`.
 
-Below is an annotated example with every field set to its default. The real file is plain JSON — strip the `//` comments before saving.
+> **Absent fields preserve Claude Code's own defaults.** If a top-level key under `settings` is missing from your `config.json` (e.g. you delete the `userMessageDisplay` block, or omit `misc.enableVerboseProperty`), tweakcc will _not_ apply the corresponding patch — CC's unmodified behavior is preserved. Set a field explicitly to opt into tweakcc's customization. This is a fork-specific semantic; upstream tweakcc would deep-merge absent fields against `DEFAULT_SETTINGS` and patch regardless.
+
+**Minimal example.** Only opt into a few patches — everything else stays at CC's default:
 
 ```jsonc
 {
-  "ccVersion": "2.1.62",                       // CC version tweakcc last saw; drives prompt refresh & conflicts.
+  "ccVersion": "2.1.112",
+  "ccInstallationPath": null,
+  "changesApplied": false,
+  "settings": {
+    "misc": {
+      "enableVerboseProperty": true,
+      "expandThinkingBlocks": true,
+      "showTweakccVersion": true,
+      "showPatchesApplied": true,
+    },
+  },
+}
+```
+
+Below is an annotated example with every field set to its default, for reference. The real file is plain JSON — strip the `//` comments before saving. You don't need to include every field; only the ones you want tweakcc to apply.
+
+```jsonc
+{
+  "ccVersion": "2.1.62", // CC version tweakcc last saw; drives prompt refresh & conflicts.
 
   // Absolute path to the CC installation (cli.js for npm installs, binary for native).
   // Set on first detection. Overridable via TWEAKCC_CC_INSTALLATION_PATH env var.
   "ccInstallationPath": "/home/user/.local/bin/claude",
 
-  "ccInstallationDir": null,                   // Deprecated; only read to migrate old configs.
-  "lastModified": "2026-04-21T00:00:00.000Z",  // ISO timestamp of last config write.
-  "changesApplied": true,                      // Last --apply succeeded; drives "patches applied" indicator.
-  "hidePiebaldAnnouncement": false,            // (Optional) Hide Piebald promo block in TUI.
+  "ccInstallationDir": null, // Deprecated; only read to migrate old configs.
+  "lastModified": "2026-04-21T00:00:00.000Z", // ISO timestamp of last config write.
+  "changesApplied": true, // Last --apply succeeded; drives "patches applied" indicator.
+  "hidePiebaldAnnouncement": false, // (Optional) Hide Piebald promo block in TUI.
 
   // (Optional) Cached copy of the last --config-url fetch. Its `settings` is a
   // Partial<Settings> merged on top of local settings when applying.
   "remoteConfig": {
     "sourceUrl": "https://gist.example/config.json",
     "dateFetched": "2026-04-21T00:00:00.000Z",
-    "settings": { /* partial Settings object */ }
+    "settings": {
+      /* partial Settings object */
+    },
   },
 
   "settings": {
@@ -137,9 +159,9 @@ Below is an annotated example with every field set to its default. The real file
 
           // --- Rate-limit bar ---
           "rate_limit_fill": "rgb(177,185,249)",
-          "rate_limit_empty": "rgb(80,83,112)"
-        }
-      }
+          "rate_limit_empty": "rgb(80,83,112)",
+        },
+      },
       // ... plus 6 other default themes (light, light-ansi, dark-ansi,
       //     light-daltonized, dark-daltonized, monochrome) with the same shape.
     ],
@@ -151,42 +173,48 @@ Below is an annotated example with every field set to its default. The real file
       // Format string; "{}" is replaced with a randomly selected verb.
       "format": "{}… ",
       // 177 verbs by default; one picked at random per response.
-      "verbs": ["Accomplishing", "Actioning", "Baking", "Brewing", "Cogitating" /* ... */]
+      "verbs": [
+        "Accomplishing",
+        "Actioning",
+        "Baking",
+        "Brewing",
+        "Cogitating" /* ... */,
+      ],
     },
 
     // ======
     // thinkingStyle — spinner animation next to the thinking verb.
     // ======
     "thinkingStyle": {
-      "updateInterval": 120,                      // Delay between frames in ms. Lower = faster.
-      "phases": ["·", "✢", "✳", "✶", "✻", "✽"],  // Frames to cycle; platform-dependent default.
-      "reverseMirror": true                       // Plays forwards then backwards (ping-pong).
+      "updateInterval": 120, // Delay between frames in ms. Lower = faster.
+      "phases": ["·", "✢", "✳", "✶", "✻", "✽"], // Frames to cycle; platform-dependent default.
+      "reverseMirror": true, // Plays forwards then backwards (ping-pong).
     },
 
     // ======
     // userMessageDisplay — styling for user messages in the chat transcript.
     // ======
     "userMessageDisplay": {
-      "format": " > {} ",                   // Format string; "{}" is replaced with the message text.
-      "styling": [],                        // bold | italic | underline | strikethrough | inverse.
-      "foregroundColor": "default",         // "default" | "rgb(r,g,b)" | "ansi:<name>".
-      "backgroundColor": null,              // null / "default" = no background, else a color.
+      "format": " > {} ", // Format string; "{}" is replaced with the message text.
+      "styling": [], // bold | italic | underline | strikethrough | inverse.
+      "foregroundColor": "default", // "default" | "rgb(r,g,b)" | "ansi:<name>".
+      "backgroundColor": null, // null / "default" = no background, else a color.
 
       // One of: "none", "single", "double", "round", "bold", "singleDouble",
       // "doubleSingle", "classic", "topBottomSingle", "topBottomDouble", "topBottomBold".
       "borderStyle": "none",
 
-      "borderColor": "rgb(255,255,255)",    // Color when borderStyle isn't "none".
-      "paddingX": 0,                        // Horizontal padding inside the box.
-      "paddingY": 0,                        // Vertical padding inside the box.
-      "fitBoxToContent": false              // Shrink box to fit message instead of filling width.
+      "borderColor": "rgb(255,255,255)", // Color when borderStyle isn't "none".
+      "paddingX": 0, // Horizontal padding inside the box.
+      "paddingY": 0, // Vertical padding inside the box.
+      "fitBoxToContent": false, // Shrink box to fit message instead of filling width.
     },
 
     // ======
     // inputBox
     // ======
     "inputBox": {
-      "removeBorder": false  // Remove the rounded border around the input box.
+      "removeBorder": false, // Remove the rounded border around the input box.
     },
 
     // ======
@@ -194,61 +222,61 @@ Below is an annotated example with every field set to its default. The real file
     // ======
     "misc": {
       // --- Startup / UI ---
-      "showTweakccVersion": true,               // Show "+ tweakcc v<VERSION>" message at startup.
-      "showPatchesApplied": true,               // Show "patches applied" indicator at startup.
-      "hideStartupBanner": false,               // Hide CC's startup banner.
-      "hideStartupClawd": false,                // Hide the Clawd ASCII art at startup.
-      "hideCtrlGToEdit": false,                 // Hide "ctrl-g to edit prompt" hint.
-      "expandThinkingBlocks": true,             // Thinking blocks expanded by default.
-      "enableVerboseProperty": true,            // Verbose token counter (time + thinking state).
-      "suppressNativeInstallerWarning": false,  // Suppress "use native installer" warning.
-      "filterScrollEscapeSequences": false,     // Filter terminal scroll escape sequences.
+      "showTweakccVersion": true, // Show "+ tweakcc v<VERSION>" message at startup.
+      "showPatchesApplied": true, // Show "patches applied" indicator at startup.
+      "hideStartupBanner": false, // Hide CC's startup banner.
+      "hideStartupClawd": false, // Hide the Clawd ASCII art at startup.
+      "hideCtrlGToEdit": false, // Hide "ctrl-g to edit prompt" hint.
+      "expandThinkingBlocks": true, // Thinking blocks expanded by default.
+      "enableVerboseProperty": true, // Verbose token counter (time + thinking state).
+      "suppressNativeInstallerWarning": false, // Suppress "use native installer" warning.
+      "filterScrollEscapeSequences": false, // Filter terminal scroll escape sequences.
 
       // --- Model / agent ---
-      "enableModelCustomizations": true,  // /model lists all models, not just latest 3.
-      "enableOpusplan1m": true,           // Add opusplan[1m] alias (Opus plan, Sonnet 1M exec).
-      "allowCustomAgentModels": false,    // Allow arbitrary model names in agent frontmatter.
+      "enableModelCustomizations": true, // /model lists all models, not just latest 3.
+      "enableOpusplan1m": true, // Add opusplan[1m] alias (Opus plan, Sonnet 1M exec).
+      "allowCustomAgentModels": false, // Allow arbitrary model names in agent frontmatter.
 
       // Replace default context limit with CLAUDE_CODE_CONTEXT_LIMIT env var (falls back to 200K).
       "enableContextLimitOverride": false,
 
       // --- MCP ---
-      "mcpConnectionNonBlocking": true,  // Start CC immediately; MCPs connect in background.
-      "mcpServerBatchSize": null,        // Parallel MCP connections (1-20). null = default (3).
-      "enableChannelsMode": false,       // Force-enable MCP channel notifications (bypasses tengu_harbor).
+      "mcpConnectionNonBlocking": true, // Start CC immediately; MCPs connect in background.
+      "mcpServerBatchSize": null, // Parallel MCP connections (1-20). null = default (3).
+      "enableChannelsMode": false, // Force-enable MCP channel notifications (bypasses tengu_harbor).
 
       // --- Statusline ---
-      "statuslineThrottleMs": null,         // Throttle interval ms. null = default. 0 = instant.
-      "statuslineUseFixedInterval": false,  // Use setInterval instead of throttle.
+      "statuslineThrottleMs": null, // Throttle interval ms. null = default. 0 = instant.
+      "statuslineUseFixedInterval": false, // Use setInterval instead of throttle.
 
       // --- Session memory / conversation titles ---
-      "enableSessionMemory": true,           // Force-enable session memory (bypasses tengu_session_memory).
-      "enableRememberSkill": false,          // Register "remember" skill that writes findings to CLAUDE.local.md.
-      "enableConversationTitle": true,       // Enable /title and /rename for manually naming conversations.
-      "enableTitleVisibilityToggle": false,  // Add /session-title to toggle session title visibility.
+      "enableSessionMemory": true, // Force-enable session memory (bypasses tengu_session_memory).
+      "enableRememberSkill": false, // Register "remember" skill that writes findings to CLAUDE.local.md.
+      "enableConversationTitle": true, // Enable /title and /rename for manually naming conversations.
+      "enableTitleVisibilityToggle": false, // Add /session-title to toggle session title visibility.
 
       // --- File reads / output ---
-      "increaseFileReadLimit": false,     // Raise Read token limit 25k → 1M.
-      "suppressLineNumbers": false,       // Remove "1→" prefixes (saves tokens).
-      "suppressRateLimitOptions": false,  // Don't auto-trigger /rate-limit-options.
-      "tableFormat": "default",           // "default" | "ascii" | "clean" | "clean-top-bottom".
-      "tokenCountRounding": null,         // Round token counts to nearest multiple.
+      "increaseFileReadLimit": false, // Raise Read token limit 25k → 1M.
+      "suppressLineNumbers": false, // Remove "1→" prefixes (saves tokens).
+      "suppressRateLimitOptions": false, // Don't auto-trigger /rate-limit-options.
+      "tableFormat": "default", // "default" | "ascii" | "clean" | "clean-top-bottom".
+      "tokenCountRounding": null, // Round token counts to nearest multiple.
 
       // --- Plan mode / permissions ---
-      "autoAcceptPlanMode": false,            // Auto-accept plans; skip "Ready to code?" prompt.
-      "allowBypassPermissionsInSudo": false,  // ⚠️ Allow --dangerously-skip-permissions under sudo (no check).
+      "autoAcceptPlanMode": false, // Auto-accept plans; skip "Ready to code?" prompt.
+      "allowBypassPermissionsInSudo": false, // ⚠️ Allow --dangerously-skip-permissions under sudo (no check).
 
       // --- Experimental / feature-flag bypasses ---
-      "enableSwarmMode": true,             // Force-enable swarm mode.
-      "enableWorktreeMode": true,          // Force-enable EnterWorktree tool (bypasses tengu_worktree_mode flag).
-      "enableVoiceMode": false,            // Force-enable /voice (bypasses tengu_amber_quartz gate).
-      "enableVoiceConciseOutput": true,    // Concise voice output (needs enableVoiceMode).
-      "enableFixLspSupport": true,         // Remove field-validation errors; add textDocument/didOpen.
-      "enableCustomSessionColors": false,  // Accept hex/rgb in /color; enable customColorMap.
+      "enableSwarmMode": true, // Force-enable swarm mode.
+      "enableWorktreeMode": true, // Force-enable EnterWorktree tool (bypasses tengu_worktree_mode flag).
+      "enableVoiceMode": false, // Force-enable /voice (bypasses tengu_amber_quartz gate).
+      "enableVoiceConciseOutput": true, // Concise voice output (needs enableVoiceMode).
+      "enableFixLspSupport": true, // Remove field-validation errors; add textDocument/didOpen.
+      "enableCustomSessionColors": false, // Accept hex/rgb in /color; enable customColorMap.
 
       // Map of custom named colors (e.g. { "mycolor": "rgb(1,2,3)" }).
       // Used when enableCustomSessionColors is true.
-      "customColorMap": null
+      "customColorMap": null,
     },
 
     // ======
@@ -259,8 +287,8 @@ Below is an annotated example with every field set to its default. The real file
       // { "name": "research", "allowedTools": ["WebFetch", "WebSearch", "Read"] },
       // { "name": "everything", "allowedTools": "*" }
     ],
-    "defaultToolset": null,   // Toolset auto-selected on CC start.
-    "planModeToolset": null,  // Toolset used in plan mode.
+    "defaultToolset": null, // Toolset auto-selected on CC start.
+    "planModeToolset": null, // Toolset used in plan mode.
 
     // ======
     // subagentModels — per-subagent model overrides. null = CC default.
@@ -268,7 +296,7 @@ Below is an annotated example with every field set to its default. The real file
     "subagentModels": {
       "plan": null,
       "explore": null,
-      "generalPurpose": null
+      "generalPurpose": null,
     },
 
     // ======
@@ -302,9 +330,9 @@ Below is an annotated example with every field set to its default. The real file
       "QWEN.md",
       "IFLOW.md",
       "WARP.md",
-      "copilot-instructions.md"
-    ]
-  }
+      "copilot-instructions.md",
+    ],
+  },
 }
 ```
 
@@ -346,4 +374,3 @@ tweakcc stores a backup of your Claude Code `cli.js`/binary for when you want to
 In particular, you may run into a situation where you have a tweakcc-patched (or maybe a prettier-formatted) `claude` but no tweakcc backup. And then it makes a backup of that modified `claude`. If you then try to reinstall Claude Code and apply your customizations, tweakcc will restore its backup of the old _modified_ `claude`.
 
 To break out of this loop you can install a different version of Claude Code, which will cause tweakcc to discard its existing backup and take a fresh backup of the new `claude` file. Or you can simply delete tweakcc's backup file (located at `~/.tweakcc/cli.backup.js` or `~/.tweakcc/native-binary.backup`). If you do delete `cli.backup.js` or `native-binary.backup`, make sure you reinstall Claude Code _before_ you run tweakcc again, because if your `claude` is still the modified version, it will get into the same loop again.
-
