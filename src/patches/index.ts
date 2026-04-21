@@ -726,7 +726,7 @@ export const applyCustomization = async (
       fn: c =>
         writeThinkerSymbolChars(c, config.settings.thinkingStyle!.phases),
       condition:
-        !!config.settings.thinkingStyle &&
+        !!config.settings.thinkingStyle?.phases &&
         JSON.stringify(config.settings.thinkingStyle.phases) !==
           JSON.stringify(DEFAULT_SETTINGS.thinkingStyle.phases),
     },
@@ -737,7 +737,7 @@ export const applyCustomization = async (
           config.settings.thinkingStyle!.updateInterval
         ),
       condition:
-        !!config.settings.thinkingStyle &&
+        config.settings.thinkingStyle?.updateInterval != null &&
         config.settings.thinkingStyle.updateInterval !==
           DEFAULT_SETTINGS.thinkingStyle.updateInterval &&
         (ccInstInfo.version == null ||
@@ -752,7 +752,7 @@ export const applyCustomization = async (
           ) + 1
         ),
       condition:
-        !!config.settings.thinkingStyle &&
+        !!config.settings.thinkingStyle?.phases &&
         JSON.stringify(config.settings.thinkingStyle.phases) !==
           JSON.stringify(DEFAULT_SETTINGS.thinkingStyle.phases),
     },
@@ -763,7 +763,7 @@ export const applyCustomization = async (
           config.settings.thinkingStyle!.reverseMirror
         ),
       condition:
-        !!config.settings.thinkingStyle &&
+        config.settings.thinkingStyle?.reverseMirror != null &&
         config.settings.thinkingStyle.reverseMirror !==
           DEFAULT_SETTINGS.thinkingStyle.reverseMirror,
     },
