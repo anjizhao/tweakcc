@@ -34,24 +34,16 @@ Below is an annotated example with every field set to its default. The real file
 
 ```jsonc
 {
-  // Claude Code version tweakcc last saw. Drives prompt re-fetching and conflict warnings.
-  "ccVersion": "2.1.62",
+  "ccVersion": "2.1.62",                              // Claude Code version tweakcc last saw. Drives prompt re-fetching and conflict warnings.
 
   // Absolute path to the CC installation (cli.js for npm installs, binary for native).
-  // Set on first detection. Overridable via the TWEAKCC_CC_INSTALLATION_PATH env var.
+  // Set on first detection. Overridable via TWEAKCC_CC_INSTALLATION_PATH env var.
   "ccInstallationPath": "/home/user/.local/bin/claude",
 
-  // Deprecated: only read to migrate old configs into ccInstallationPath.
-  "ccInstallationDir": null,
-
-  // ISO timestamp tweakcc stamps when it writes the config.
-  "lastModified": "2026-04-21T00:00:00.000Z",
-
-  // Whether the last --apply succeeded. Drives the "patches applied" indicator at startup.
-  "changesApplied": true,
-
-  // (Optional) Hides the upstream Piebald promo block in the TUI.
-  "hidePiebaldAnnouncement": false,
+  "ccInstallationDir": null,                          // Deprecated: only read to migrate old configs into ccInstallationPath.
+  "lastModified": "2026-04-21T00:00:00.000Z",         // ISO timestamp tweakcc stamps when it writes the config.
+  "changesApplied": true,                             // Whether the last --apply succeeded. Drives the "patches applied" startup indicator.
+  "hidePiebaldAnnouncement": false,                   // (Optional) Hides the upstream Piebald promo block in the TUI.
 
   // (Optional) Cached copy of the last --config-url fetch. Its `settings` is a
   // Partial<Settings> merged on top of local settings when applying.
@@ -160,55 +152,43 @@ Below is an annotated example with every field set to its default. The real file
     // thinkingVerbs — the word shown while Claude is generating.
     // ======
     "thinkingVerbs": {
-      // Format string; "{}" is replaced with a randomly selected verb.
-      "format": "{}… ",
-      // Pool of verbs. One is picked at random per response. 177 verbs by default.
-      "verbs": ["Accomplishing", "Actioning", "Baking", "Brewing", "Cogitating" /* ... */]
+      "format": "{}… ",                               // Format string; "{}" is replaced with a randomly selected verb.
+      "verbs": ["Accomplishing", "Actioning", "Baking", "Brewing", "Cogitating" /* ... */]  // 177 verbs by default; one picked at random per response.
     },
 
     // ======
     // thinkingStyle — spinner animation next to the thinking verb.
     // ======
     "thinkingStyle": {
-      // Delay between frames in ms. Lower = faster.
-      "updateInterval": 120,
-      // Characters to cycle through. Default is platform-dependent.
-      "phases": ["·", "✢", "✳", "✶", "✻", "✽"],
-      // If true, the animation plays forwards then backwards (ping-pong).
-      "reverseMirror": true
+      "updateInterval": 120,                          // Delay between frames in ms. Lower = faster.
+      "phases": ["·", "✢", "✳", "✶", "✻", "✽"],      // Characters to cycle through. Default is platform-dependent.
+      "reverseMirror": true                           // If true, plays forwards then backwards (ping-pong).
     },
 
     // ======
     // userMessageDisplay — styling for user messages in the chat transcript.
     // ======
     "userMessageDisplay": {
-      // Format string; "{}" is replaced with the message text.
-      "format": " > {} ",
-      // Any of: "bold", "italic", "underline", "strikethrough", "inverse".
-      "styling": [],
-      // "default" to leave uncolored, otherwise "rgb(r,g,b)" or "ansi:<name>".
-      "foregroundColor": "default",
-      // null/"default" for no background, otherwise a color.
-      "backgroundColor": null,
+      "format": " > {} ",                             // Format string; "{}" is replaced with the message text.
+      "styling": [],                                  // Any of: "bold", "italic", "underline", "strikethrough", "inverse".
+      "foregroundColor": "default",                   // "default" to leave uncolored, otherwise "rgb(r,g,b)" or "ansi:<name>".
+      "backgroundColor": null,                        // null/"default" for no background, otherwise a color.
+
       // One of: "none", "single", "double", "round", "bold", "singleDouble",
       // "doubleSingle", "classic", "topBottomSingle", "topBottomDouble", "topBottomBold".
       "borderStyle": "none",
-      // Border color when borderStyle isn't "none".
-      "borderColor": "rgb(255,255,255)",
-      // Horizontal padding inside the box.
-      "paddingX": 0,
-      // Vertical padding inside the box.
-      "paddingY": 0,
-      // If true, the box shrinks to fit the message instead of filling width.
-      "fitBoxToContent": false
+
+      "borderColor": "rgb(255,255,255)",              // Border color when borderStyle isn't "none".
+      "paddingX": 0,                                  // Horizontal padding inside the box.
+      "paddingY": 0,                                  // Vertical padding inside the box.
+      "fitBoxToContent": false                        // If true, box shrinks to fit the message instead of filling width.
     },
 
     // ======
     // inputBox
     // ======
     "inputBox": {
-      // Removes the rounded border around the input box for a cleaner look.
-      "removeBorder": false
+      "removeBorder": false                           // Removes the rounded border around the input box for a cleaner look.
     },
 
     // ======
@@ -216,93 +196,60 @@ Below is an annotated example with every field set to its default. The real file
     // ======
     "misc": {
       // --- Startup / UI ---
-      // Show the blue "+ tweakcc v<VERSION>" message at startup.
-      "showTweakccVersion": true,
-      // Show the green "tweakcc patches are applied" indicator at startup.
-      "showPatchesApplied": true,
-      // Hide CC's startup banner shown before the first prompt.
-      "hideStartupBanner": false,
-      // Hide the Clawd ASCII art at startup.
-      "hideStartupClawd": false,
-      // Hide the "ctrl-g to edit prompt" hint shown during streaming.
-      "hideCtrlGToEdit": false,
-      // Thinking blocks always expanded instead of collapsed.
-      "expandThinkingBlocks": true,
-      // Token counter shows detailed info like "(2s · ↓ 169 tokens · thinking)".
-      "enableVerboseProperty": true,
-      // Suppress the "use the native installer" warning at startup.
-      "suppressNativeInstallerWarning": false,
-      // Filter out terminal escape sequences that cause unwanted scrolling.
-      "filterScrollEscapeSequences": false,
+      "showTweakccVersion": true,                     // Show the blue "+ tweakcc v<VERSION>" message at startup.
+      "showPatchesApplied": true,                     // Show the green "tweakcc patches are applied" indicator at startup.
+      "hideStartupBanner": false,                     // Hide CC's startup banner shown before the first prompt.
+      "hideStartupClawd": false,                      // Hide the Clawd ASCII art at startup.
+      "hideCtrlGToEdit": false,                       // Hide the "ctrl-g to edit prompt" hint shown during streaming.
+      "expandThinkingBlocks": true,                   // Thinking blocks always expanded instead of collapsed.
+      "enableVerboseProperty": true,                  // Token counter shows detailed info like "(2s · ↓ 169 tokens · thinking)".
+      "suppressNativeInstallerWarning": false,        // Suppress the "use the native installer" warning at startup.
+      "filterScrollEscapeSequences": false,           // Filter out terminal escape sequences that cause unwanted scrolling.
 
       // --- Model / agent ---
-      // /model lists all Claude models instead of just the latest 3.
-      "enableModelCustomizations": true,
-      // Add the opusplan[1m] alias (Opus for planning, Sonnet 1M for building).
-      "enableOpusplan1m": true,
-      // Replace default context limit with CLAUDE_CODE_CONTEXT_LIMIT env var
-      // (falls back to 200K if env var not set).
+      "enableModelCustomizations": true,              // /model lists all Claude models instead of just the latest 3.
+      "enableOpusplan1m": true,                       // Add the opusplan[1m] alias (Opus for planning, Sonnet 1M for building).
+
+      // Replace default context limit with CLAUDE_CODE_CONTEXT_LIMIT env var (falls back to 200K if env var not set).
       "enableContextLimitOverride": false,
-      // Allow arbitrary model names in custom-agent frontmatter (e.g. "gemini-2.5-flash").
-      "allowCustomAgentModels": false,
+
+      "allowCustomAgentModels": false,                // Allow arbitrary model names in custom-agent frontmatter (e.g. "gemini-2.5-flash").
 
       // --- MCP ---
-      // Start CC immediately while MCPs connect in background.
-      "mcpConnectionNonBlocking": true,
-      // Number of parallel MCP connections (1–20). null = CC default (3).
-      "mcpServerBatchSize": null,
-      // Force-enable MCP channel notifications (bypasses tengu_harbor flag + allowlist).
-      "enableChannelsMode": false,
+      "mcpConnectionNonBlocking": true,               // Start CC immediately while MCPs connect in background.
+      "mcpServerBatchSize": null,                     // Number of parallel MCP connections (1–20). null = CC default (3).
+      "enableChannelsMode": false,                    // Force-enable MCP channel notifications (bypasses tengu_harbor flag + allowlist).
 
       // --- Statusline ---
-      // Throttle statusline updates to this interval (ms). null = CC default. 0 = instant.
-      "statuslineThrottleMs": null,
-      // If true, use setInterval instead of throttle (fixed schedule, not on-demand).
-      "statuslineUseFixedInterval": false,
+      "statuslineThrottleMs": null,                   // Throttle statusline updates to this interval (ms). null = CC default. 0 = instant.
+      "statuslineUseFixedInterval": false,            // If true, use setInterval instead of throttle (fixed schedule, not on-demand).
 
       // --- Session memory / conversation titles ---
-      // Force-enable session memory (bypasses tengu_session_memory and tengu_coral_fern).
-      "enableSessionMemory": true,
-      // Register a "remember" skill that reviews session memories into CLAUDE.local.md.
-      "enableRememberSkill": false,
-      // Enable /title and /rename for manually naming conversations.
-      "enableConversationTitle": true,
-      // Add /session-title to toggle session title visibility in the prompt bar.
-      "enableTitleVisibilityToggle": false,
+      "enableSessionMemory": true,                    // Force-enable session memory (bypasses tengu_session_memory and tengu_coral_fern).
+      "enableRememberSkill": false,                   // Register a "remember" skill that reviews session memories into CLAUDE.local.md.
+      "enableConversationTitle": true,                // Enable /title and /rename for manually naming conversations.
+      "enableTitleVisibilityToggle": false,           // Add /session-title to toggle session title visibility in the prompt bar.
 
       // --- File reads / output ---
-      // Raise the Read file token limit from 25,000 to 1,000,000.
-      "increaseFileReadLimit": false,
-      // Remove "1→" line-number prefixes from Read output (saves tokens).
-      "suppressLineNumbers": false,
-      // Prevent CC from auto-triggering /rate-limit-options on rate limits.
-      "suppressRateLimitOptions": false,
-      // "default" | "ascii" | "clean" | "clean-top-bottom". See upstream README for examples.
-      "tableFormat": "default",
-      // Round displayed token counts to nearest multiple of this integer. null = no rounding.
-      "tokenCountRounding": null,
+      "increaseFileReadLimit": false,                 // Raise the Read file token limit from 25,000 to 1,000,000.
+      "suppressLineNumbers": false,                   // Remove "1→" line-number prefixes from Read output (saves tokens).
+      "suppressRateLimitOptions": false,              // Prevent CC from auto-triggering /rate-limit-options on rate limits.
+      "tableFormat": "default",                       // "default" | "ascii" | "clean" | "clean-top-bottom". See upstream README for examples.
+      "tokenCountRounding": null,                     // Round displayed token counts to nearest multiple of this integer. null = no rounding.
 
       // --- Plan mode / permissions ---
-      // Auto-accept plans instead of showing the "Ready to code?" prompt.
-      "autoAcceptPlanMode": false,
-      // ⚠️ Allow --dangerously-skip-permissions under sudo. Disables a security check.
-      "allowBypassPermissionsInSudo": false,
+      "autoAcceptPlanMode": false,                    // Auto-accept plans instead of showing the "Ready to code?" prompt.
+      "allowBypassPermissionsInSudo": false,          // ⚠️ Allow --dangerously-skip-permissions under sudo. Disables a security check.
 
       // --- Experimental / feature-flag bypasses ---
-      // Force-enable swarm mode.
-      "enableSwarmMode": true,
-      // Force-enable the EnterWorktree tool (bypasses tengu_worktree_mode flag).
-      "enableWorktreeMode": true,
-      // Force-enable /voice (bypasses tengu_amber_quartz gate).
-      "enableVoiceMode": false,
-      // Enable concise-output prompt for voice. Only applies when enableVoiceMode is on.
-      "enableVoiceConciseOutput": true,
-      // Remove unimplemented-field validation errors; add textDocument/didOpen notifications.
-      "enableFixLspSupport": true,
-      // Accept hex/rgb values in /color and named colors from customColorMap.
-      "enableCustomSessionColors": false,
-      // Map of custom named colors (e.g. { "mycolor": "rgb(1,2,3)" }).
-      // Active when enableCustomSessionColors is true.
+      "enableSwarmMode": true,                        // Force-enable swarm mode.
+      "enableWorktreeMode": true,                     // Force-enable the EnterWorktree tool (bypasses tengu_worktree_mode flag).
+      "enableVoiceMode": false,                       // Force-enable /voice (bypasses tengu_amber_quartz gate).
+      "enableVoiceConciseOutput": true,               // Enable concise-output prompt for voice. Only applies when enableVoiceMode is on.
+      "enableFixLspSupport": true,                    // Remove unimplemented-field validation errors; add textDocument/didOpen notifications.
+      "enableCustomSessionColors": false,             // Accept hex/rgb values in /color and named colors from customColorMap.
+
+      // Map of custom named colors (e.g. { "mycolor": "rgb(1,2,3)" }). Active when enableCustomSessionColors is true.
       "customColorMap": null
     },
 
@@ -314,10 +261,8 @@ Below is an annotated example with every field set to its default. The real file
       // { "name": "research", "allowedTools": ["WebFetch", "WebSearch", "Read"] },
       // { "name": "everything", "allowedTools": "*" }
     ],
-    // Name of the toolset auto-selected on CC start.
-    "defaultToolset": null,
-    // Name of the toolset used when in plan mode.
-    "planModeToolset": null,
+    "defaultToolset": null,                           // Name of the toolset auto-selected on CC start.
+    "planModeToolset": null,                          // Name of the toolset used when in plan mode.
 
     // ======
     // subagentModels — per-subagent model overrides. null = CC default.
@@ -336,9 +281,9 @@ Below is an annotated example with every field set to its default. The real file
       // {
       //   "name": "File path",
       //   "regex": "(?:[a-zA-Z]:)?[/\\\\]?[a-zA-Z0-9._-]+(?:[/\\\\][a-zA-Z0-9._-]+)+",
-      //   "regexFlags": "g",           // must include "g"
-      //   "format": "{MATCH}",           // {MATCH} placeholder; can add chars around it
-      //   "styling": ["bold"],           // any of bold, italic, underline, strikethrough, inverse
+      //   "regexFlags": "g",                         // must include "g"
+      //   "format": "{MATCH}",                        // {MATCH} placeholder; can add chars around it
+      //   "styling": ["bold"],                        // any of: bold, italic, underline, strikethrough, inverse
       //   "foregroundColor": "rgb(71,194,10)",
       //   "backgroundColor": null,
       //   "enabled": true
