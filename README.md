@@ -18,7 +18,7 @@ This is my personal fork of [tweakcc](https://github.com/Piebald-AI/tweakcc), a 
 
 tweakcc works by patching Claude Code's minified `cli.js` file, reading customizations from `~/.tweakcc/config.json`. For npm-based installations `cli.js` is modified directly, but for native installations it's extracted from the binary using [node-lief](https://github.com/Piebald-AI/node-lief), patched, and then the binary is repacked. When you update your Claude Code installation, your customizations will be overwritten, but they're remembered in your configuration file, so they can be reapplied by just running `npx tweakcc --apply`.
 
-tweakcc is verified to work with Claude Code **2.1.62.** In newer or earlier versions various patches might not work. However, if we have the [system prompts for your version](https://github.com/Piebald-AI/tweakcc/tree/main/data/prompts) then system prompt patching is guaranteed to work with that version, even if it's significantly different from the verified CC version&mdash;the version number stated above is only relevant for the non-system-prompt patches.
+tweakcc is verified to work with Claude Code **2.1.112.** In newer or earlier versions various patches might not work. However, if we have the [system prompts for your version](https://github.com/Piebald-AI/tweakcc/tree/main/data/prompts) then system prompt patching is guaranteed to work with that version, even if it's significantly different from the verified CC version&mdash;the version number stated above is only relevant for the non-system-prompt patches.
 
 You can also create custom patches using tweakcc without having to fork it or open a PR. `tweakcc adhoc-patch` supports using custom scripts that work with native and npm-based installs and that automatically detect your Claude Code installation. See the [upstream README](https://github.com/Piebald-AI/tweakcc#readme) for details.
 
@@ -349,10 +349,10 @@ mv ~/.tweakcc ~/.claude/tweakcc
 
 ## Building from source
 
-You can use tweakcc by running `npx tweakcc`, or `npm install -g tweakcc` and then `tweakcc`. Or build and run it locally:
+You can use tweakcc by running `npx tweakcc`, or `npm install -g tweakcc` and then `tweakcc` (note: these install from upstream, not this fork). To build and run this fork locally:
 
 ```bash
-git clone https://github.com/Piebald-AI/tweakcc.git
+git clone https://github.com/anjizhao/tweakcc.git
 cd tweakcc
 pnpm i
 pnpm build
