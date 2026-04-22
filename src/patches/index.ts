@@ -639,8 +639,8 @@ export const applyCustomization = async (
 
   // Extract config values that are used multiple times or need pre-computation
   const tableFormat = config.settings.misc?.tableFormat ?? 'default';
-  const showTweakccVersion = config.settings.misc?.showTweakccVersion ?? true;
-  const showPatchesApplied = config.settings.misc?.showPatchesApplied ?? true;
+  const showTweakccVersion = !!config.settings.misc?.showTweakccVersion;
+  const showPatchesApplied = !!config.settings.misc?.showPatchesApplied;
 
   // ==========================================================================
   // Define patch implementations (keyed by PatchId)
@@ -648,12 +648,12 @@ export const applyCustomization = async (
   // Keep model list customization and select-menu size behavior in sync.
   // Disabling model customizations should restore both selectors to vanilla CC behavior.
   const modelCustomizationsEnabled =
-    config.settings.misc?.enableModelCustomizations ?? true;
+    !!config.settings.misc?.enableModelCustomizations;
   const patchImplementations: Record<PatchId, PatchImplementation> = {
     // Misc Configurable
     'verbose-property': {
       fn: c => writeVerboseProperty(c),
-      condition: config.settings.misc?.enableVerboseProperty ?? true,
+      condition: !!config.settings.misc?.enableVerboseProperty,
     },
     'context-limit': {
       fn: c => writeContextLimit(c),
@@ -661,7 +661,7 @@ export const applyCustomization = async (
     },
     opusplan1m: {
       fn: c => writeOpusplan1m(c),
-      condition: config.settings.misc?.enableOpusplan1m ?? true,
+      condition: !!config.settings.misc?.enableOpusplan1m,
     },
     'thinking-block-styling': {
       fn: c => writeThinkingBlockStyling(c),
@@ -671,7 +671,7 @@ export const applyCustomization = async (
     },
     'fix-lsp-support': {
       fn: c => writeFixLspSupport(c),
-      condition: config.settings.misc?.enableFixLspSupport ?? true,
+      condition: !!config.settings.misc?.enableFixLspSupport,
     },
     'statusline-update-throttle': {
       fn: c =>
@@ -723,18 +723,21 @@ export const applyCustomization = async (
       condition: !!config.settings.thinkingVerbs,
     },
     'thinker-symbol-chars': {
-      fn: c => writeThinkerSymbolChars(c, config.settings.thinkingStyle.phases),
+      fn: c =>
+        writeThinkerSymbolChars(c, config.settings.thinkingStyle!.phases),
       condition:
+        !!config.settings.thinkingStyle?.phases &&
         JSON.stringify(config.settings.thinkingStyle.phases) !==
-        JSON.stringify(DEFAULT_SETTINGS.thinkingStyle.phases),
+          JSON.stringify(DEFAULT_SETTINGS.thinkingStyle.phases),
     },
     'thinker-symbol-speed': {
       fn: c =>
         writeThinkerSymbolSpeed(
           c,
-          config.settings.thinkingStyle.updateInterval
+          config.settings.thinkingStyle!.updateInterval
         ),
       condition:
+        config.settings.thinkingStyle?.updateInterval != null &&
         config.settings.thinkingStyle.updateInterval !==
           DEFAULT_SETTINGS.thinkingStyle.updateInterval &&
         (ccInstInfo.version == null ||
@@ -744,22 +747,25 @@ export const applyCustomization = async (
       fn: c =>
         writeThinkerSymbolWidthLocation(
           c,
-          Math.max(...config.settings.thinkingStyle.phases.map(p => p.length)) +
-            1
+          Math.max(
+            ...config.settings.thinkingStyle!.phases.map(p => p.length)
+          ) + 1
         ),
       condition:
+        !!config.settings.thinkingStyle?.phases &&
         JSON.stringify(config.settings.thinkingStyle.phases) !==
-        JSON.stringify(DEFAULT_SETTINGS.thinkingStyle.phases),
+          JSON.stringify(DEFAULT_SETTINGS.thinkingStyle.phases),
     },
     'thinker-symbol-mirror': {
       fn: c =>
         writeThinkerSymbolMirrorOption(
           c,
-          config.settings.thinkingStyle.reverseMirror
+          config.settings.thinkingStyle!.reverseMirror
         ),
       condition:
+        config.settings.thinkingStyle?.reverseMirror != null &&
         config.settings.thinkingStyle.reverseMirror !==
-        DEFAULT_SETTINGS.thinkingStyle.reverseMirror,
+          DEFAULT_SETTINGS.thinkingStyle.reverseMirror,
     },
     'input-box-border': {
       fn: c => writeInputBoxBorder(c, config.settings.inputBox!.removeBorder),
@@ -774,7 +780,7 @@ export const applyCustomization = async (
     },
     'thinking-visibility': {
       fn: c => writeThinkingVisibility(c),
-      condition: config.settings.misc?.expandThinkingBlocks ?? true,
+      condition: !!config.settings.misc?.expandThinkingBlocks,
     },
     'hide-startup-banner': {
       fn: c => writeHideStartupBanner(c),
@@ -889,7 +895,7 @@ export const applyCustomization = async (
     'conversation-title': {
       fn: c => writeConversationTitle(c),
       condition:
-        (config.settings.misc?.enableConversationTitle ?? true) &&
+        !!config.settings.misc?.enableConversationTitle &&
         !!(
           ccInstInfo.version &&
           compareVersions(ccInstInfo.version, '2.0.64') < 0
@@ -899,7 +905,7 @@ export const applyCustomization = async (
       fn: c =>
         writeVoiceMode(
           c,
-          config.settings.misc?.enableVoiceConciseOutput ?? true
+          config.settings.misc?.enableVoiceConciseOutput ?? false
         ),
       condition: !!config.settings.misc?.enableVoiceMode,
     },
@@ -909,10 +915,7 @@ export const applyCustomization = async (
     },
     'custom-session-colors': {
       fn: c =>
-        writeCustomSessionColors(
-          c,
-          config.settings.misc?.customColorMap ?? {}
-        ),
+        writeCustomSessionColors(c, config.settings.misc?.customColorMap ?? {}),
       condition: !!config.settings.misc?.enableCustomSessionColors,
     },
     'title-visibility-toggle': {

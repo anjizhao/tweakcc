@@ -26,7 +26,27 @@ You can also create custom patches using tweakcc without having to fork it or op
 
 tweakcc reads `~/.tweakcc/config.json` on each run. The shape is defined by [`TweakccConfig`](src/types.ts) in `src/types.ts`; defaults come from [`DEFAULT_SETTINGS`](src/defaultSettings.ts) in `src/defaultSettings.ts`.
 
-Below is an annotated example with every field set to its default. The real file is plain JSON — strip the `//` comments before saving.
+> **Absent fields preserve Claude Code's own defaults.** If a top-level key under `settings` is missing from your `config.json` (e.g. you delete the `userMessageDisplay` block, or omit `misc.enableVerboseProperty`), tweakcc will *not* apply the corresponding patch — CC's unmodified behavior is preserved. Set a field explicitly to opt into tweakcc's customization. This is a fork-specific semantic; upstream tweakcc would deep-merge absent fields against `DEFAULT_SETTINGS` and patch regardless.
+
+**Minimal example.** Only opt into a few patches — everything else stays at CC's default:
+
+```jsonc
+{
+  "ccVersion": "2.1.112",
+  "ccInstallationPath": null,
+  "changesApplied": false,
+  "settings": {
+    "misc": {
+      "enableVerboseProperty": true,
+      "expandThinkingBlocks": true,
+      "showTweakccVersion": true,
+      "showPatchesApplied": true
+    }
+  }
+}
+```
+
+Below is an annotated example with every field set to its default, for reference. The real file is plain JSON — strip the `//` comments before saving. You don't need to include every field; only the ones you want tweakcc to apply.
 
 ```jsonc
 {

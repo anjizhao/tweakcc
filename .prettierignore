@@ -1,2 +1,5 @@
 # Extracted prompts data - preserve original formatting
 data/prompts/
+
+# Aligned JSONC comments in the config.json reference
+README.md

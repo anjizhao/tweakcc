@@ -187,12 +187,11 @@ const normalizeConfig = (config: TweakccConfig): void => {
     delete tmpThinkingVerbs.punctuation;
   }
 
-  // Deep merge the loaded settings with defaults to fill in any missing keys (recursively)
-  // This ensures all required properties exist, including nested ones like inputPatternHighlighters
-  config.settings = deepMergeWithDefaults(
-    config.settings,
-    DEFAULT_SETTINGS
-  ) as Settings;
+  // Intentionally do NOT deep-merge top-level settings against DEFAULT_SETTINGS.
+  // Fields absent from the user's config.json must stay absent so that tweakcc
+  // defaults aren't silently applied as patches; absent == "leave Claude Code's
+  // default behavior alone."  Per-item array templates (below) are different:
+  // they fill missing sub-fields of entries the user explicitly added.
 
   // Merge each inputPatternHighlighter item against the default template
   // This ensures each highlighter has all required properties even if some were deleted
