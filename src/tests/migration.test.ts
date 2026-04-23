@@ -1,11 +1,24 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { describe, it, vi, expect } from 'vitest';
+import { describe, it, vi, expect, beforeEach } from 'vitest';
 import { DEFAULT_SETTINGS } from '../defaultSettings';
 import { readConfigFile } from '../config';
 import { migrateConfigIfNeeded } from '../migration';
+import * as systemPromptHashIndex from '../systemPromptHashIndex';
 import { createEnoent } from './testHelpers';
+
+// readConfigFile save-backs a normalized config when migrations mutate it.
+// Without this, the tests below would call real fs.writeFile and clobber the
+// user's ~/.tweakcc/config.json on every `pnpm test` run.
+vi.mock('node:fs/promises');
+
+beforeEach(() => {
+  vi.spyOn(
+    systemPromptHashIndex,
+    'hasUnappliedSystemPromptChanges'
+  ).mockResolvedValue(false);
+});
 
 describe('userMessageDisplay migration', () => {
   it('should migrate old prefix/message structure to new format string', async () => {
